@@ -1,0 +1,3 @@
+client ne contient pas numer_compte 
+
+on ajoute un table jours_cycle qui contient id_jour et id_cycle 
