@@ -36,7 +36,7 @@ const Offre = sequelize.define(
       allowNull: true,
     },
     etat: {
-      type: Sequelize.ENUM("valide", "expiré"),
+      type: Sequelize.ENUM("valide", "expirée","supprimée"),
       allowNull: false,
       defaultValue: "valide",
     },

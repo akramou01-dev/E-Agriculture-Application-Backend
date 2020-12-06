@@ -73,5 +73,9 @@ router.post(
 router.get("/type-agriculture", admin_controllers.types_agriculture);
 router.get("/type-paiment", admin_controllers.types_paiment);
 router.get("/type-terre", admin_controllers.types_terre);
+router.get("/offre", admin_controllers.offres);
+
+// DELETE Routes
+router.delete("/offre/:id_offre", admin_controllers.delete_offre);
 
 module.exports = router;

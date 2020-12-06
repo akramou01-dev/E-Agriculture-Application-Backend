@@ -87,16 +87,21 @@ exports.create_type_terre = (req, res, next) => {
     .catch((err) => error_handler(err, next));
 };
 exports.create_offre = (req, res, next) => {
+  // we must extract the id_admin from the JWToken and put it in the request as user_id
+  // const id_admin = req.user_id;
+  // for testing
+  const id_admin = 1;
   const titre = req.body.titre;
   const description = req.body.description;
   const prix = req.body.prix;
   const durée = req.body.durée;
+  // the admin has the possibility to set a temporaire offre so he will set date_expiration but in the normal case he does not have to set date_expiration
   const date_expiration = req.body.date_expiration
     ? req.body.date_expiration
     : null;
 
-  console.log(date_expiration);
   validation_errors_handler(req);
+  // validating the date_expiration
   if (date_expiration) {
     const date = new Date();
     const current_date_format = `${date.getFullYear()}-${
@@ -109,6 +114,7 @@ exports.create_offre = (req, res, next) => {
       );
     }
   }
+  // cheking the offre existe
   Offre.findOne({ where: { titre: titre, description: description } })
     .then((offre) => {
       if (offre) {
@@ -123,7 +129,7 @@ exports.create_offre = (req, res, next) => {
         date_creation: new Date(),
         prix: prix,
         durée: durée,
-        id_admin: 1,
+        id_admin: id_admin,
         date_expiration: date_expiration ? date_expiration : null,
       });
       return new_offre.save();
@@ -256,6 +262,46 @@ exports.types_terre = (req, res, next) => {
           types: new_types,
         });
       }
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.offres = (req, res, next) => {
+  // const id_admin = req.user_id
+  const id_admin = 1;
+  Offre.findAll({ where: { id_admin: id_admin } })
+    .then((offres) => {
+      if (!offres) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de la récupération des données.",
+          500
+        );
+      }
+      res.status(200).json({
+        offres: offres,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.delete_offre = (req, res, next) => {
+  const id_admin = 1;
+  const id_offre = req.params.id_offre;
+  Offre.findOne({
+    where: {
+      id_admin: id_admin,
+      id_offre: id_offre,
+    },
+  })
+    .then((offre) => {
+      if (!offre) {
+        create_and_throw_error("L'offre n'existe pas.", 404);
+      }
+      offre.etat = "supprimée";
+      return offre.save();
+    })
+    .then((saved_offre) => {
+      res.status(200).json({
+        offre: saved_offre,
+      });
     })
     .catch((err) => error_handler(err, next));
 };
