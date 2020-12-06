@@ -45,6 +45,14 @@ const Offre = sequelize.define(
       type: Sequelize.DATE,
       allowNull: true,
     },
+    id_admin: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "admin",
+        key: "id_admin",
+      },
+    },
   },
   {
     timestamps: false,
@@ -52,4 +60,4 @@ const Offre = sequelize.define(
     tableName: "offre",
   }
 );
-module.exports = offre;
+module.exports = Offre;

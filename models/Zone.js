@@ -10,13 +10,9 @@ const Zone = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    id_terre: {
-      type: Sequelize.INTEGER.UNSIGNED,
+    nbr_irrigation_rester: {
+      type: Sequelize.INTEGER,
       allowNull: false,
-      reference: {
-        model: "terre",
-        key: "id_terre",
-      },
     },
     id_type_agriculture: {
       type: Sequelize.INTEGER.UNSIGNED,
@@ -26,9 +22,21 @@ const Zone = sequelize.define(
         key: "id_type",
       },
     },
-    nbr_irrigation_rester: {
-      type: Sequelize.INTEGER,
+    id_terre: {
+      type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
+      reference: {
+        model: "terre",
+        key: "id_terre",
+      },
+    },
+    id_cycle: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {  
+        model: "cycle_vegetal",
+        key: "id_cycle",
+      },
     },
   },
   {

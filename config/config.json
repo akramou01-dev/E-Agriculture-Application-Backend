@@ -3,7 +3,7 @@
         "username": "root",
         "password": "Mot de passe 12",
         "port": 3306,
-        "database": "grean_it",
+        "database": "green_it",
         "host": "127.0.0.1",
         "dialect": "mysql",
         "logging": false

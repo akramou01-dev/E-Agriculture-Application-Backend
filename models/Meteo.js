@@ -22,6 +22,14 @@ const Meteo = sequelize.define(
       type: Sequelize.DATE,
       allowNull: false,
     },
+    id_terre: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull : false,
+      reference: {
+        model: "terre",
+        key: "id_terre",
+      },
+    },
   },
   {
     timestamps: false,

@@ -10,6 +10,11 @@ const Irrigation = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    etat: {
+      type: Sequelize.ENUM("marche", "terminé", "annulé"),
+      allowNull: false,
+      defaultValue: "marche",
+    },
     date_debut: {
       type: Sequelize.DATE,
       allowNull: false,

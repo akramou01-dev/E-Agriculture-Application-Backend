@@ -13,7 +13,19 @@ const TypeAgriculture = sequelize.define(
     type: {
       type: Sequelize.STRING(45),
       allowNull: false,
-      comment: "null",
+    },
+    date_creation: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+
+    id_admin: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "admin",
+        key: "id_admin",
+      },
     },
   },
   {

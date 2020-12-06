@@ -23,9 +23,9 @@ const Coupon = sequelize.define(
     date_fin: {
       type: Sequelize.DATE,
       allowNull: false,
-      comment: "null",
     },
-    reduction: { // en %
+    reduction: {
+      // en %
       type: Sequelize.INTEGER,
       allowNull: false,
       comment: "null",
@@ -33,6 +33,14 @@ const Coupon = sequelize.define(
     nbr_utilisation: {
       type: Sequelize.INTEGER,
       allowNull: false,
+    },
+    id_offre: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "offre",
+        key: "id_offre",
+      },
     },
   },
   {

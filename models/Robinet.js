@@ -22,7 +22,7 @@ const Robinet = sequelize.define(
         key: "id_zone",
       },
     },
-    pompe: {
+    id_pompe: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       reference: {

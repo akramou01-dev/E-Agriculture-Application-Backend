@@ -22,22 +22,21 @@ const Facture = sequelize.define(
     montant: {
       type: Sequelize.INTEGER,
       allowNull: false,
-      comment: "null",
     },
     url_pdf: {
       type: Sequelize.TEXT,
       allowNull: true,
+      comment: "null",
     },
     TVA: {
       type: Sequelize.INTEGER(2),
       allowNull: false,
-      comment: "null",
       defaultValue: 19,
     },
     id_type_paiment: {
       // on peut l'enlever et le extracter depui le client car on a le id_client
       type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: true,
+      allowNull: false,
       reference: {
         model: "type_paiment",
         key: "id_type",
@@ -49,6 +48,14 @@ const Facture = sequelize.define(
       reference: {
         model: "contrat",
         key: "id_contrat",
+      },
+    },
+    id_client: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "client",
+        key: "id_client",
       },
     },
     timbre: {

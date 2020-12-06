@@ -18,12 +18,24 @@ const Terre = sequelize.define(
         key: "id_type",
       },
     },
-    adresse: {
-      type: Sequelize.TEXT,
+    localisation: {
+      type: Sequelize.STRING(45),
       allowNull: false,
     },
     superficie: {
       type: Sequelize.INTEGER(9),
+      allowNull: false,
+    },
+    id_offre: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "offre",
+        key: "id_offre",
+      },
+    },
+    date_expriration_offre: {
+      type: Sequelize.DATE,
       allowNull: false,
     },
     id_client: {
