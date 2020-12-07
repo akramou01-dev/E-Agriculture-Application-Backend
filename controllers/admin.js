@@ -3,12 +3,15 @@ const TypePaiment = require("../models/TypePaiment");
 const TypeTerre = require("../models/TypeTerre");
 const Admin = require("../models/Admin");
 const Offre = require("../models/Offre");
+const Client = require("../models/Client");
 
 const {
   error_handler,
   validation_errors_handler,
   create_and_throw_error,
 } = require("../utils/error_handlers");
+const Coupon = require("../models/Coupon");
+const { validationResult } = require("express-validator");
 
 exports.create_type_agriculture = (req, res, next) => {
   const type_agriculture = req.body.type;
@@ -140,6 +143,51 @@ exports.create_offre = (req, res, next) => {
       });
     })
     .catch((err) => error_handler(err, next));
+};
+exports.create_coupon = (req, res, next) => {
+  const id_admin = 1;
+  const code = req.body.code;
+  const offre = req.body.offre;
+  const date_debut = req.body.date_debut;
+  const date_fin = req.body.date_fin;
+  const reduction = req.body.reduction;
+  const nbr_utilisation = req.body.nbr_utilisation;
+  validation_errors_handler(req);
+
+  const date = new Date();
+  const current_date_format = `${date.getFullYear()}-${
+    date.getMonth() < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+  }-${date.getDay() < 10 ? "0" + date.getDate() : date.getDate()}`;
+  if (date_debut < current_date_format) {
+    create_and_throw_error("La date du debut doit étre dans le future.", 402);
+  }
+  if (date_debut > date_fin) {
+    create_and_throw_error(
+      "La date debut doit etre avant la date de la fin du coupon",
+      402
+    );
+  }
+
+  // checking the existance of the coupon
+  Coupon.findOne({
+    where: {
+      code: code,
+      date_debut: date_debut,
+      date_fin: date_fin,
+    },
+  })
+    .then((coupon) => {
+      if (coupon) {
+        create_and_throw_error("Le coupon existe deja", 402);
+      }
+      return Offre.findOne({ where: { titre: offre } });
+    })
+    .then((offre) => {
+      if (!offre) {
+        create_and_throw_error("L'offre n'existe pas.", 404);
+      }
+      // creting the instance
+    });
 };
 
 exports.types_agriculture = (req, res, next) => {
@@ -301,6 +349,92 @@ exports.delete_offre = (req, res, next) => {
     .then((saved_offre) => {
       res.status(200).json({
         offre: saved_offre,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+
+exports.update_offre = (req, res, next) => {
+  const id_admin = 2;
+  const id_offre = req.params.id_offre;
+  const description = req.body.description;
+  const titre = req.body.titre;
+  const prix = req.body.prix;
+  const durée = req.body.durée;
+  validation_errors_handler(req);
+  // checking if the offre existe and fetch it
+  Offre.findByPk(id_offre)
+    .then(async (offre) => {
+      if (!offre) {
+        create_and_throw_error("L'offre n'existe pas.", 404);
+      }
+      // checking if the admin cad edit this offre
+      if (offre.dataValues.id_admin !== id_admin) {
+        create_and_throw_error("Vous ne pouvez pas modifier cette offre.", 402);
+      }
+      if (offre.dataValues.etat !== "valide") {
+        create_and_throw_error(
+          "Vous ne pouvez pas modifier cette offre car elle est expirée ou supprimée.",
+          402
+        );
+      }
+      // for evoiding writing in the database so we do the tests in the backend
+      if (description && offre.dataValues.description !== description) {
+        offre.description = description;
+      }
+      if (titre && offre.dataValues.titre !== titre) {
+        const fetched_offre = await Offre.findOne({ where: { titre: titre } });
+        if (fetched_offre) {
+          create_and_throw_error("Le titre existe deja.", 402);
+        }
+        offre.titre = titre;
+      }
+      if (prix && offre.dataValues.prix !== prix) {
+        offre.prix = prix;
+      }
+      if (durée && offre.dataValues.durée !== durée) {
+        offre.durée = durée;
+      }
+      return offre.save();
+    })
+    .then((saved_offre) => {
+      res.status(200).json({
+        offre: saved_offre,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.desactiver_compte_client = (req, res, next) => {
+  const id_client = req.params.id_client;
+  Client.findByPk(id_client)
+    .then((client) => {
+      if (!client) {
+        create_and_throw_error("Le client n'existe pas.", 404);
+      }
+      client.etat = "desactivé";
+      return client.save();
+    })
+    .then((saved_client) => {
+      res.status(200).json({
+        client: saved_client,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+// suppression logique du compte
+exports.supprimer_compte_client = (req, res, next) => {
+  const id_client = req.params.id_client;
+  Client.findByPk(id_client)
+    .then((client) => {
+      if (!client) {
+        create_and_throw_error("Le client n'existe pas.", 404);
+      }
+      client.etat = "bloqué";
+      return client.save();
+    })
+    .then((saved_client) => {
+      res.status(200).json({
+        client: saved_client,
       });
     })
     .catch((err) => error_handler(err, next));

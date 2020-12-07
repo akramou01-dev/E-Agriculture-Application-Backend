@@ -42,9 +42,17 @@ const Coupon = sequelize.define(
         key: "id_offre",
       },
     },
+    id_admin: {
+      type: Sequelize.INTEGER.UNSIGNED,
+      allowNull: false,
+      reference: {
+        model: "admin",
+        key: "id_admin",
+      },
+    },
   },
   {
-    timestamps: false,
+    timestamps: true,
     freezeTableName: true,
     tableName: "coupon",
   }

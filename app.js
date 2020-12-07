@@ -56,6 +56,12 @@ app.use((error, req, res, next) => {
 
 // database relations
 
+Coupon.belongsTo(Admin, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_admin",
+});
+
 TypePaiment.belongsTo(Admin, {
   constraints: true,
   onDelete: "CASCADE",

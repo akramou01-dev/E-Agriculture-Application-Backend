@@ -75,6 +75,10 @@ router.get("/type-paiment", admin_controllers.types_paiment);
 router.get("/type-terre", admin_controllers.types_terre);
 router.get("/offre", admin_controllers.offres);
 
+// PUT Routes
+router.put("/offre/:id_offre", admin_controllers.update_offre);
+router.put("/client/:id_client", admin_controllers.desactiver_compte_client);
+
 // DELETE Routes
 router.delete("/offre/:id_offre", admin_controllers.delete_offre);
 
