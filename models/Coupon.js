@@ -10,6 +10,11 @@ const Coupon = sequelize.define(
       comment: "null",
       autoIncrement: true,
     },
+    // etat: {
+    //   type: Sequelize.ENUM("valide", "expiré"),
+    //   allowNull: false,
+    //   defaultValue: "valide",
+    // },
     code: {
       type: Sequelize.STRING(45),
       allowNull: false,

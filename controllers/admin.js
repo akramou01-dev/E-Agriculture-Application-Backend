@@ -172,22 +172,38 @@ exports.create_coupon = (req, res, next) => {
   Coupon.findOne({
     where: {
       code: code,
-      date_debut: date_debut,
-      date_fin: date_fin,
+      etat: "valide",
     },
   })
     .then((coupon) => {
       if (coupon) {
-        create_and_throw_error("Le coupon existe deja", 402);
+        create_and_throw_error("Le code du coupon existe deja", 402);
       }
+      // checking if the offre exist
       return Offre.findOne({ where: { titre: offre } });
     })
     .then((offre) => {
       if (!offre) {
         create_and_throw_error("L'offre n'existe pas.", 404);
       }
-      // creting the instance
-    });
+      //creating the instance
+      const new_coupon = new Coupon({
+        code: code,
+        date_debut: date_debut,
+        date_fin: date_fin,
+        reduction: reduction,
+        nbr_utilisation: nbr_utilisation,
+        id_offre: offre.dataValues.id_offre,
+        id_admin: id_admin,
+      });
+      return new_coupon.save();
+    })
+    .then((saved_coupon) => {
+      res.status(200).json({
+        coupon: saved_coupon,
+      });
+    })
+    .catch((err) => error_handler(err, next));
 };
 
 exports.types_agriculture = (req, res, next) => {
@@ -330,6 +346,38 @@ exports.offres = (req, res, next) => {
     })
     .catch((err) => error_handler(err, next));
 };
+exports.coupons = (req, res, next) => {
+  const id_admin = 1;
+  Coupon.findAll({ where: { id_admin: id_admin } })
+    .then(async (coupons) => {
+      if (!coupons) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de la récupération des données.",
+          500
+        );
+      }
+      const new_coupons = await Promise.all(
+        coupons.map(async (coupon) => {
+          const offre_coupon = await Offre.findByPk(coupon.dataValues.id_offre);
+          // the offre does not existe
+          if (!offre_coupon) {
+            create_and_throw_error(
+              `L'offre du coupon sous le code -${coupon.dataValues.code}- n'existe pas`
+            );
+          }
+          return {
+            ...coupon.dataValues,
+            titre_offre: offre_coupon.dataValues.titre,
+          };
+        })
+      );
+      res.status(200).json({
+        coupons: new_coupons,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+
 exports.delete_offre = (req, res, next) => {
   const id_admin = 1;
   const id_offre = req.params.id_offre;

@@ -67,6 +67,48 @@ router.post(
   ],
   admin_controllers.create_offre
 );
+router.post(
+  "/coupon",
+  [
+    body("code")
+      .notEmpty()
+      .withMessage("Le code du coupon est manquant.")
+      .trim(),
+    body("date_debut")
+      .notEmpty()
+      .withMessage("La date debut d'utilisation du coupon est manquante.")
+      .isDate()
+      .withMessage("La date du debut n'est pas valide.")
+      .trim(),
+    body("date_fin")
+      .notEmpty()
+      .withMessage("La date de la fin d'utilisation du coupon est manquante.")
+      .isDate()
+      .withMessage("La date de la fin n'est pas valide.")
+      .trim(),
+    body("nbr_utilisation")
+      .notEmpty()
+      .withMessage("Le nombre d'utilisation du coupon est manquant.")
+      .isNumeric()
+      .withMessage("Le nombre d'utilisation du coupon n'est pas valide.")
+      .trim(),
+    body("reduction")
+      .notEmpty()
+      .withMessage(
+        "Le coupon doit contenir un pourcentage de réduction du prix de l'offre."
+      )
+      .isNumeric()
+      .withMessage("La réduction n'est pas valide.")
+      .trim(),
+    body("offre")
+      .notEmpty()
+      .withMessage(
+        "Le coupon doit étre lié a une offre, veillez selectionnez une des offres disponible."
+      )
+      .trim(),
+  ],
+  admin_controllers.create_coupon
+);
 
 // GET Routes
 
@@ -74,6 +116,7 @@ router.get("/type-agriculture", admin_controllers.types_agriculture);
 router.get("/type-paiment", admin_controllers.types_paiment);
 router.get("/type-terre", admin_controllers.types_terre);
 router.get("/offre", admin_controllers.offres);
+router.get("/coupon", admin_controllers.coupons);
 
 // PUT Routes
 router.put("/offre/:id_offre", admin_controllers.update_offre);
