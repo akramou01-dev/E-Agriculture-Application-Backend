@@ -403,7 +403,7 @@ exports.delete_offre = (req, res, next) => {
 };
 
 exports.update_offre = (req, res, next) => {
-  const id_admin = 2;
+  const id_admin = 1;
   const id_offre = req.params.id_offre;
   const description = req.body.description;
   const titre = req.body.titre;

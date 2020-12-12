@@ -6,6 +6,9 @@ const app = express();
 // importing database
 const sequelize = require("./config/Database");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+
 // importing models
 const Admin = require("./models/Admin");
 const Offre = require("./models/Offre");
@@ -26,6 +29,8 @@ const Irrigation = require("./models/Irrigation");
 const Pompe = require("./models/Pompe");
 const Robinet = require("./models/Robinet");
 
+
+
 // importing routes
 const adminRoutes = require("./routes/admin");
 
@@ -39,7 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/admin", adminRoutes);
+app.use("/api/admin", adminRoutes);
 
 // app.use("/", (req, res, next) => {
 //   res.send("Hey from GreenIt API");
@@ -53,6 +58,9 @@ app.use((error, req, res, next) => {
   const data = error.data;
   res.status(status).json({ data: data, message: message, status: status });
 });
+
+// swagger middelware
+app.use("/api-doc", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // database relations
 

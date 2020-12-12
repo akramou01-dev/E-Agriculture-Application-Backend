@@ -119,7 +119,36 @@ router.get("/offre", admin_controllers.offres);
 router.get("/coupon", admin_controllers.coupons);
 
 // PUT Routes
-router.put("/offre/:id_offre", admin_controllers.update_offre);
+router.put(
+  "/offre/:id_offre",
+  /**adding the isAuth and isAdmin middelwares */ [
+    body("titre")
+      .notEmpty()
+      .withMessage("Le titre de l'offre est manquant.")
+      .isLength({ min: 4, max: 20 })
+      .withMessage("Le titre peut contenir entre 4 et 20 caractères.")
+      .trim(),
+    body("description")
+      .notEmpty()
+      .withMessage("La description est obligatoire")
+      .isLength({ min: 30, max: 120 })
+      .withMessage("La description doit étre entre 30 et 120 caractère")
+      .trim(),
+    body("prix")
+      .notEmpty()
+      .withMessage("Veillez entrez le prix de l'offre.")
+      .isNumeric()
+      .withMessage("Le prix doit étre un nombre.")
+      .trim(),
+    body("durée")
+      .notEmpty()
+      .withMessage(
+        "La durée de l'offre est obligatoire et doit étre en année."
+      ),
+    body("date_expiration").trim(),
+  ],
+  admin_controllers.update_offre
+);
 router.put("/client/:id_client", admin_controllers.desactiver_compte_client);
 
 // DELETE Routes

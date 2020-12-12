@@ -1,0 +1,679 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "GreenIt",
+        "description": "Projet professionel pour la gestion d'une ferme",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "localhost:5000",
+    "basePath": "/api/",
+    "tags": [
+        {
+            "name": "Type d'agriculture",
+            "description": ""
+        },
+        {
+            "name": "Type de paiment",
+            "description": ""
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/admin/type-agriculture": {
+            "post": {
+                "tags": [
+                    "Type d'agriculture"
+                ],
+                "summary": "Crée un nouveau type d'agriculture",
+                "description": "",
+                "operationId": "addTypeAgriculture",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Donnée pour crée un type d'agriculture",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TypeAgriculture"
+                        }
+                    },
+                    "402": {
+                        "description": "Validation errors"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Type d'agriculture"
+                ],
+                "summary": "Liste de tous les types d'agriculture pour disponible dans le systeme.",
+                "description": "Liste de tous les types d'agriculture pour crée par l'admine connecter disponible dans le systeme\n il faut envoyer le token dans le request (pas pour l'instant car on a pas encore implementer l'auth",
+                "operationId": "getAllTypeAgriculture",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TypeAgriculture"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/type-paiment": {
+            "post": {
+                "tags": [
+                    "Type de paiment"
+                ],
+                "summary": "Crée un nouveau type de paiment",
+                "description": "Les nouveau type de paiment peuvent étre 'Carte blue','Chaque bancaire'",
+                "operationId": "addTypePaiment",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Donnée pour crée un type de paiment",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TypePaiment"
+                        }
+                    },
+                    "402": {
+                        "description": "Validation errors"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Type de paiment"
+                ],
+                "summary": "Liste de tous les types de paiment pour disponible dans le systeme.",
+                "description": "Liste de tous les types de paiment pour crée par l'admine connecter disponible dans le systeme\n Il faut envoyer le token dans le request (pas pour l'instant car on a pas encore implementer l'auth",
+                "operationId": "getAllTypeAgriculture",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TypePaiment"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/type-terre": {
+            "post": {
+                "tags": [
+                    "Type de terre"
+                ],
+                "summary": "Crée un nouveau type de terre",
+                "description": "",
+                "operationId": "addTypeTerre",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Donnée pour crée un type de terre.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeType"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TypeTerre"
+                        }
+                    },
+                    "402": {
+                        "description": "Validation errors"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Type de terre"
+                ],
+                "summary": "Liste de tous les types de terre pour disponible dans le systeme.",
+                "description": "Liste de tous les types de terre pour crée par l'admine connecter disponible dans le systeme\n Il faut envoyer le token dans le request (pas pour l'instant car on a pas encore implementer l'auth",
+                "operationId": "getAllTypeTerre",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TypeTerre"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/offre": {
+            "post": {
+                "tags": [
+                    "Offre"
+                ],
+                "summary": "Crée un nouvelle offre",
+                "description": "Crée une offre pour un service spécifique.\n Pour les offres qui sont temporaire on doit ajouter une date d'expiration dans le request.",
+                "operationId": "addOffre",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Donnée pour crée une offre.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeOffre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Offre"
+                        }
+                    },
+                    "402": {
+                        "description": "Validation errors"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Offre"
+                ],
+                "summary": "Liste de tous les offre pour un tel service.",
+                "description": "",
+                "operationId": "getAllOffre",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Offre"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/offre/{id_offre}": {
+            "put": {
+                "tags": [
+                    "Offre"
+                ],
+                "summary": "Modifier une offre.",
+                "description": "",
+                "operationId": "updateOffre",
+                "parameters": [
+                    {
+                        "name": "id_offre",
+                        "in": "path",
+                        "description": "L'identifiant de l'offre a modifier",
+                        "type": "integer",
+                        "fomrat": "int64"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Request fields",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeOffre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Offre"
+                        }
+                    },
+                    "404": {
+                        "description": "Offre pas trouver."
+                    },
+                    "402": {
+                        "description": "Erreur de validation."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Offre"
+                ],
+                "summary": "Supprimer une offre.",
+                "description": "La suppression sera logique.",
+                "operationId": "deleteOffre",
+                "parameters": [
+                    {
+                        "name": "id_offre",
+                        "in": "path",
+                        "description": "l'ID de l'offre a supprimer.",
+                        "type": "integer",
+                        "fomrat": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Offre supprimer avec succée"
+                    },
+                    "404": {
+                        "description": "Offre pas trouver."
+                    }
+                }
+            }
+        },
+        "/admin/coupon": {
+            "post": {
+                "tags": [
+                    "Coupon"
+                ],
+                "summary": "Crée un nouveau coupon",
+                "description": "Crée un coupon pour une offre specifique.\n Le champs reduction est en %.(pour reduire la somme depuis l'ancienne somme)",
+                "operationId": "addCoupon",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Donnée pour crée un coupon.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeCoupon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Coupon"
+                        }
+                    },
+                    "402": {
+                        "description": "Erreur de validation."
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "Coupon"
+                ],
+                "summary": "Liste de tous les coupon.",
+                "description": "",
+                "operationId": "getAllCoupon",
+                "consumes": "application/json",
+                "produces": "application/json",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Coupon"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/coupon/{id_coupon}": {
+            "put": {
+                "tags": [
+                    "Coupon"
+                ],
+                "summary": "Modifier un coupon (en attente d'implementation).",
+                "description": "",
+                "operationId": "updateCoupon",
+                "parameters": [
+                    {
+                        "name": "id_coupon",
+                        "in": "path",
+                        "description": "L'identifiant du coupon a modifier",
+                        "type": "integer",
+                        "fomrat": "int64"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Request fields",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CréeCoupon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Coupon"
+                        }
+                    },
+                    "404": {
+                        "description": "Coupon pas trouver."
+                    },
+                    "402": {
+                        "description": "Erreur de validation."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Coupon"
+                ],
+                "summary": "Supprimer un coupon.(en attente d'implémentation)",
+                "description": "La suppression sera logique.",
+                "operationId": "deleteCoupon",
+                "parameters": [
+                    {
+                        "name": "id_coupon",
+                        "in": "path",
+                        "description": "l'ID du coupn a supprimer.",
+                        "type": "integer",
+                        "fomrat": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon supprimer avec succée"
+                    },
+                    "404": {
+                        "description": "Coupon pas trouver."
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "CréeType": {
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "CréeOffre": {
+            "required": [
+                "titre",
+                "description",
+                "prix",
+                "durée"
+            ],
+            "properties": {
+                "titre": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "durée": {
+                    "type": "integer"
+                },
+                "prix": {
+                    "type": "integer"
+                },
+                "date_expiration": {
+                    "type": "integer"
+                }
+            }
+        },
+        "CréeCoupon": {
+            "required": [
+                "code",
+                "date_debut",
+                "date_fin",
+                "nbr_utilisation",
+                "reduction",
+                "offre"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "date_fin": {
+                    "type": "string"
+                },
+                "date_debut": {
+                    "type": "string"
+                },
+                "nbr_utilisation": {
+                    "type": "integer"
+                },
+                "reduction": {
+                    "type": "integer"
+                },
+                "offre": {
+                    "type": "string"
+                }
+            }
+        },
+        "TypeAgriculture": {
+            "required": [
+                "id_type",
+                "type",
+                "date_creation",
+                "id_admin"
+            ],
+            "properties": {
+                "id_type": {
+                    "type": "integer",
+                    "description": "test"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "date_creation": {
+                    "type": "string"
+                },
+                "id_admin": {
+                    "type": "integer"
+                }
+            }
+        },
+        "TypePaiment": {
+            "required": [
+                "id_type",
+                "nom",
+                "date_creation",
+                "id_admin"
+            ],
+            "properties": {
+                "id_type": {
+                    "type": "integer",
+                    "description": "test"
+                },
+                "nom": {
+                    "type": "string"
+                },
+                "date_creation": {
+                    "type": "string"
+                },
+                "id_admin": {
+                    "type": "integer"
+                }
+            }
+        },
+        "TypeTerre": {
+            "required": [
+                "id_type",
+                "type",
+                "date_creation",
+                "id_admin"
+            ],
+            "properties": {
+                "id_type": {
+                    "type": "integer",
+                    "description": "test"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "date_creation": {
+                    "type": "string"
+                },
+                "id_admin": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Offre": {
+            "required": [
+                "id_offre",
+                "titre",
+                "description",
+                "prix",
+                "durée",
+                "date_creation",
+                "date_modification",
+                "date_expiration",
+                "etat",
+                "id_admin"
+            ],
+            "properties": {
+                "id_offre": {
+                    "type": "integer",
+                    "description": "test"
+                },
+                "titre": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "prix": {
+                    "type": "integer"
+                },
+                "durée": {
+                    "type": "string"
+                },
+                "date_modification": {
+                    "type": "string"
+                },
+                "date_creation": {
+                    "type": "string"
+                },
+                "date_expiration": {
+                    "type": "string"
+                },
+                "etat": {
+                    "type": "string"
+                },
+                "id_admin": {
+                    "type": "integer"
+                }
+            }
+        },
+        "Coupon": {
+            "required": [
+                "id_coupon",
+                "code",
+                "date_debut",
+                "date_fin",
+                "reduction",
+                "nbr_utilisation",
+                "createdAt",
+                "updatedAt",
+                "titre_offre",
+                "id_admin"
+            ],
+            "properties": {
+                "id_coupon": {
+                    "type": "integer",
+                    "description": "test"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "date_debut": {
+                    "type": "string"
+                },
+                "date_fin": {
+                    "type": "string"
+                },
+                "reduction": {
+                    "type": "integer"
+                },
+                "nbr_utilisation": {
+                    "type": "integer"
+                },
+                "titre_offre": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "id_admin": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}
