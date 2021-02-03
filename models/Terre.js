@@ -10,6 +10,10 @@ const Terre = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    nom: {
+      type: Sequelize.STRING,
+      allowNull : false, 
+    },
     id_type_terre: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,

@@ -17,8 +17,9 @@ const Zone = sequelize.define(
     irrigation_auto : {
       type : Sequelize.BOOLEAN, 
       allowNull : false,
+      defaultValue : true,
     },
-    joures_irrigation : {
+    jours_irrigation : {
       type : Sequelize.STRING, 
       allowNull : true, 
     },

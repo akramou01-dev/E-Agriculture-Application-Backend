@@ -7,16 +7,16 @@ const Client = require("../models/Client");
 const CapteurSys = require("../models/CapteurSys");
 const TypeCapteur = require("../models/TypeCapteur");
 const CycleVegetal = require("../models/CycleVegetal");
+const Zone = require("../models/Zone");
+const Coupon = require("../models/Coupon");
+const Terre = require("../models/Terre");
 
 const {
   error_handler,
   validation_errors_handler,
   create_and_throw_error,
 } = require("../utils/error_handlers");
-const Coupon = require("../models/Coupon");
-const Terre = require("../models/Terre");
 const { Op } = require("sequelize");
-const Capteur = require("../models/TypeCapteur");
 
 exports.create_type_agriculture = (req, res, next) => {
   const type_agriculture = req.body.type;
@@ -243,6 +243,7 @@ exports.create_terre = (req, res, next) => {
   const localisation = req.body.localisation;
   const superficie = req.body.superficie;
   const type_terre = req.body.type_terre;
+  const nom = req.body.nom;
   let id_offre, id_type_agriculture, id_type_terre;
 
   validation_errors_handler(req);
@@ -293,6 +294,7 @@ exports.create_terre = (req, res, next) => {
         longitude: null,
         lattitude: null,
         id_client: user_id,
+        nom: nom,
       });
       return terre.save();
     })
@@ -402,6 +404,90 @@ exports.create_cycle_vegetal = (req, res, next) => {
     .then((saved_cycle) => {
       res.status(200).json({
         cycle: saved_cycle,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.create_zone = (req, res, next) => {
+  /**on peut ajouter le id_admin qui a crée la zone pour :
+   *    garder la trace
+   *    pour des raison de statistiques
+   */
+  const type_agriculture = req.body.type_agriculture;
+  const nom_terre = req.body.nom_terre;
+  // le format du client dans le request : 'nom_client prenom_client'
+  const client = req.body.client;
+  const nom_client = client.split(" ")[0];
+  const prenom_client = client.split(" ")[1];
+  validation_errors_handler(req);
+  let id_type_agri, id_terre, id_client, type_terre;
+
+  Client.findOne({
+    where: {
+      [Op.and]: [{ nom: nom_client }, { prenom: prenom_client }],
+    },
+  })
+    .then((client) => {
+      if (!client) {
+        create_and_throw_error("Le client spécifie n'existe pas.", 404);
+      }
+      id_client = client.dataValues.id_client;
+      return TypeAgriculture.findOne({ where: { type: type_agriculture } });
+    })
+    .then((type) => {
+      if (!type) {
+        create_and_throw_error("Le type d'agriculture n'existe pas.", 404);
+      }
+      id_type_agri = type.dataValues.id_type;
+      return Terre.findOne({
+        where: { [Op.and]: [{ id_client: id_client }, { nom: nom_terre }] },
+      });
+    })
+    .then((terre) => {
+      if (!terre) {
+        create_and_throw_error("La terre préciser n'existe pas.", 404);
+      }
+      type_terre = terre.dataValues.id_type_terre;
+      id_terre = terre.dataValues.id_terre;
+      // vérifier si la zone existe deja ou nan.
+      return Zone.findOne({
+        where: {
+          [Op.and]: [
+            { id_type_agriculture: id_type_agri },
+            { id_terre: id_terre },
+          ],
+        },
+      });
+    })
+    .then((zone) => {
+      if (zone) {
+        create_and_throw_error("La zone existe deja.", 402);
+      }
+      return CycleVegetal.findOne({
+        where: {
+          [Op.and]: [
+            { id_type_terre: type_terre },
+            { id_type_agriculture: id_type_agri },
+          ],
+        },
+      });
+    })
+    .then((cycle) => {
+      if (!cycle) {
+        create_and_throw_error("Le cycle adéquat a la zone n'existe pas.", 404);
+      }
+      const new_zone = new Zone({
+        // agriculture auto va etre comme default value === false
+        id_type_agriculture: id_type_agri,
+        id_terre: id_terre,
+        id_cycle: cycle.dataValues.id_cycle,
+      });
+      return new_zone.save();
+    })
+    .then((new_zone) => {
+      res.status(200).json({
+        zone: new_zone,
+        message: "zone crée avec succée.",
       });
     })
     .catch((err) => error_handler(err, next));
@@ -669,6 +755,112 @@ exports.type_capteur = (req, res, next) => {
       }
       res.status(200).json({
         types: types,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.cycles_vegetal = (req, res, next) => {
+  CycleVegetal.findAll()
+    .then(async (cycles) => {
+      if (!cycles) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de la récupération des données.",
+          405
+        );
+      }
+      const new_cycles = await Promise.all(
+        cycles.map(async (cycle) => {
+          const type_agriculture = await TypeAgriculture.findByPk(
+            cycle.dataValues.id_type_agriculture
+          );
+          if (!type_agriculture) {
+            create_and_throw_error(
+              `Le type d'agriculture du cycle sous le id ${cycle.dataValues.id_cycle} n'existe plus dans la base de données.`,
+              404
+            );
+          }
+          const type_terre = await TypeTerre.findByPk(
+            cycle.dataValues.id_type_terre
+          );
+          if (!type_terre) {
+            create_and_throw_error(
+              `Le type de terre du cycle sous le id ${cycle.dataValues.id_cycle} n'existe plus dans la base de données.`
+            );
+          }
+          return {
+            ...cycle.dataValues,
+            type_agriculture: {
+              nom: type_agriculture.dataValues.type,
+            },
+            type_terre: {
+              nom: type_terre.dataValues.type,
+            },
+            jours_irrigation: cycle.dataValues.jours_irrigation.split(","),
+            heures_irrigation: cycle.dataValues.heures_irrigation.split(","),
+          };
+        })
+      );
+      res.status(200).json({
+        cycles: new_cycles,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.zones = (req, res, next) => {
+  /**on va récupérer les zones d'une terre donnée pour un client donnée 
+   * les donnée de la terre et du client sont envoyer en query parameters
+   */
+  const nom_terre = req.query.nom_terre;
+  const client = req.query.client;
+  const nom_client = client.split(" ")[0];
+  const prenom_client = client.split(" ")[1];
+  validation_errors_handler(req);
+  let id_client;
+  Client.findOne({
+    where: {
+      [Op.and]: [{ nom: nom_client }, { prenom: prenom_client }],
+    },
+  })
+    .then((client) => {
+      if (!client) {
+        create_and_throw_error("Le client n'existe pas.", 404);
+      }
+      id_client = client.dataValues.id_client;
+      return Terre.findOne({
+        where: {
+          [Op.and]: [{ nom: nom_terre }, { id_client: id_client }],
+        },
+      });
+    })
+    .then((terre) => {
+      if (!terre) {
+        create_and_throw_error("Le terre n'existe pas.", 404);
+      }
+      return Zone.findAll({ where: { id_terre: terre.dataValues.id_terre } });
+    })
+    .then(async (zones) => {
+      if (!zones) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de la récupération des données.",
+          405
+        );
+      }
+      const new_zones = await Promise.all(
+        zones.map(async (zone) => {
+          const type_agriculture = await TypeAgriculture.findByPk(
+            zone.dataValues.id_type_agriculture
+          );
+          const terre = await Terre
+          return {
+            ...zone.dataValues,
+            type_agriculture: {
+              nom: type_agriculture.dataValues.type,
+            },
+          };
+        })
+      );
+      res.status(200).json({
+        zones: new_zones,
       });
     })
     .catch((err) => error_handler(err, next));

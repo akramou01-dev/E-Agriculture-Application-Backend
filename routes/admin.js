@@ -113,10 +113,8 @@ router.post(
 router.post(
   "/terre",
   [
-    body("offre")
-      .notEmpty()
-      .withMessage("L'offre est manquante est manquante.")
-      .trim(),
+    body("offre").notEmpty().withMessage("L'offre est manquante.").trim(),
+    body("nom").notEmpty().withMessage("Le nom est manquant.").trim(),
     body("type_agriculture")
       .notEmpty()
       .withMessage(
@@ -191,8 +189,6 @@ router.post(
         }
         const correct_mount = parseInt(date[0]) <= 12 && parseInt(date[0]) > 0;
         const correct_day = parseInt(date[1]) <= 31 && parseInt(date[1]) > 0;
-        console.log(correct_mount);
-        console.log(correct_day);
         if (!(correct_day && correct_mount)) {
           throw new Error(
             "La date debut n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
@@ -213,8 +209,6 @@ router.post(
         }
         const correct_mount = parseInt(date[0]) <= 12 && parseInt(date[0]) > 0;
         const correct_day = parseInt(date[1]) <= 31 && parseInt(date[1]) > 0;
-        console.log(correct_mount);
-        console.log(correct_day);
         if (!(correct_day && correct_mount)) {
           throw new Error(
             "La date fin n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
@@ -235,6 +229,34 @@ router.post(
   admin_controllers.create_cycle_vegetal
 );
 
+router.post(
+  "/zone",
+  [
+    body("type_agriculture")
+      .notEmpty()
+      .withMessage("Le type d'agriculture de la zone est manquant.")
+      .trim(),
+    body("nom_terre")
+      .notEmpty()
+      .withMessage("Vous devez spécifier le nom de la terre.")
+      .trim(),
+    body("client")
+      .notEmpty()
+      .withMessage("Veillez indiquez le propriétaire de cette zone.")
+      .custom((value, { req }) => {
+        const client_info = value.trim().split(" ");
+        if (client_info.length !== 2) {
+          throw new Error(
+            "le champs 'client' contient juste le nom et le prenom du client."
+          );
+        }
+        return true;
+      })
+      .trim(),
+  ],
+  admin_controllers.create_zone
+);
+
 // GET Routes
 
 router.get("/type-agriculture", admin_controllers.types_agriculture);
@@ -245,6 +267,8 @@ router.get("/coupon", admin_controllers.coupons);
 router.get("/terre", admin_controllers.terres);
 router.get("/types_capteur", admin_controllers.type_capteur);
 router.get("/capteur_sys", admin_controllers.capteur_sys);
+router.get("/cycle", admin_controllers.cycles_vegetal);
+router.get("/zone", admin_controllers.zones);
 
 // PUT Routes
 router.put(
