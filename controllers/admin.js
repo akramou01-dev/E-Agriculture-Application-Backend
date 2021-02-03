@@ -4,6 +4,9 @@ const TypeTerre = require("../models/TypeTerre");
 const Admin = require("../models/Admin");
 const Offre = require("../models/Offre");
 const Client = require("../models/Client");
+const CapteurSys = require("../models/CapteurSys");
+const TypeCapteur = require("../models/TypeCapteur");
+const CycleVegetal = require("../models/CycleVegetal");
 
 const {
   error_handler,
@@ -11,7 +14,9 @@ const {
   create_and_throw_error,
 } = require("../utils/error_handlers");
 const Coupon = require("../models/Coupon");
-const { validationResult } = require("express-validator");
+const Terre = require("../models/Terre");
+const { Op } = require("sequelize");
+const Capteur = require("../models/TypeCapteur");
 
 exports.create_type_agriculture = (req, res, next) => {
   const type_agriculture = req.body.type;
@@ -88,6 +93,28 @@ exports.create_type_terre = (req, res, next) => {
       });
     })
     .catch((err) => error_handler(err, next));
+};
+exports.create_type_capteur = async (req, res, next) => {
+  const type = req.body.type;
+  const user_id = 1;
+  validation_errors_handler(req);
+  try {
+    const exist_type = await TypeCapteur.findOne({ where: { type: type } });
+    if (exist_type) {
+      create_and_throw_error("Le type existe deja.", 402);
+    }
+    const new_type = new TypeCapteur({
+      id_admin: user_id,
+      type: type,
+    });
+    const saved_type = await new_type.save();
+    res.status(200).json({
+      type: saved_type,
+      message: "Type crée avec succée.",
+    });
+  } catch (err) {
+    error_handler(err, next);
+  }
 };
 exports.create_offre = (req, res, next) => {
   // we must extract the id_admin from the JWToken and put it in the request as user_id
@@ -201,6 +228,180 @@ exports.create_coupon = (req, res, next) => {
     .then((saved_coupon) => {
       res.status(200).json({
         coupon: saved_coupon,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.create_terre = (req, res, next) => {
+  // const user_id = req.user_id;
+  const user_id = 1;
+  const offre = req.body.offre;
+  /**on peut eliminer l'offre dans la terre car on va faire une commande
+   * donc l'offre peut ne pas etre obligatoire durant la création de la terre
+   */
+  const type_agriculture = req.body.type_agriculture;
+  const localisation = req.body.localisation;
+  const superficie = req.body.superficie;
+  const type_terre = req.body.type_terre;
+  let id_offre, id_type_agriculture, id_type_terre;
+
+  validation_errors_handler(req);
+
+  Offre.findOne({ where: { titre: offre } })
+    .then((offre) => {
+      if (!offre) {
+        create_and_throw_error("L'offre n'éxiste pas.", 404);
+      }
+      id_offre = offre.dataValues.id_offre;
+      return TypeAgriculture.findOne({ where: { type: type_agriculture } });
+    })
+    .then((type_agriculture) => {
+      if (!type_agriculture) {
+        create_and_throw_error("Le type d'agriculture n'éxiste pas.", 404);
+      }
+      id_type_agriculture = type_agriculture.dataValues.id_type;
+      return TypeTerre.findOne({ where: { type: type_terre } });
+    })
+    .then((type_terre_) => {
+      if (!type_terre_) {
+        create_and_throw_error("Le type de la terre n'éxiste pas.", 404);
+      }
+      id_type_terre = type_terre_.dataValues.id_type;
+      // il faut chercher si la terre existe deja ou nan avant sa creation
+      return Terre.findOne({
+        where: {
+          [Op.and]: [
+            { localisation: localisation },
+            { id_client: user_id },
+            { id_type_terre: type_terre_.dataValues.id_type },
+          ],
+        },
+      });
+    })
+    .then((terre_existe) => {
+      if (terre_existe) {
+        create_and_throw_error("La terre existe deja.", 402);
+      }
+      const terre = new Terre({
+        id_type_terre: id_type_terre,
+        localisation: localisation,
+        superficie: superficie,
+        id_type_agriculture: id_type_agriculture,
+        id_offre: id_offre,
+        date_expiration_offre: null,
+        offre_payé: false,
+        longitude: null,
+        lattitude: null,
+        id_client: user_id,
+      });
+      return terre.save();
+    })
+    .then((new_terre) => {
+      res.status(200).json({
+        message: "terre crée avec succée.",
+        terre: new_terre,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.create_capteur_sys = (req, res, next) => {
+  const user_id = 1;
+  const code = req.body.code;
+  const nom = req.body.nom;
+  const type = req.body.type;
+  console.log(type);
+  let id_type;
+  TypeCapteur.findOne({ where: { type: type } })
+    .then((type_capteur) => {
+      console.log("type_capteur" + type_capteur);
+      if (!type_capteur) {
+        create_and_throw_error("Le type du capteur n'existe pas.");
+      }
+      id_type = type_capteur.dataValues.id_type;
+      return CapteurSys.findOne({
+        where: {
+          [Op.and]: [{ id_type: id_type }, { code: code }],
+        },
+      });
+    })
+    .then((capteur) => {
+      if (capteur) {
+        create_and_throw_error("Le capteur existe deja", 402);
+      }
+      const new_capteur = new CapteurSys({
+        code: code,
+        nom: nom,
+        id_type: id_type,
+        id_admin: user_id,
+      });
+      return new_capteur.save();
+    })
+    .then((new_capteur) => {
+      res.status(200).json({
+        new_capteur: new_capteur,
+        message: "Capteur crée avec succée.",
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.create_cycle_vegetal = (req, res, next) => {
+  const jours_irrigation = req.body.jours_irrigation;
+  const heures_irrigation = req.body.heures_irrigation;
+  // type de date debut et date fin : MM-DD
+  const date_debut = req.body.date_debut;
+  const date_fin = req.body.date_fin;
+  const type_agriculture = req.body.type_agriculture;
+  const type_terre = req.body.type_terre;
+  let id_agri, id_terre;
+  validation_errors_handler(req);
+  // pour tester qu'il ya que des numero (des jours) dans le request
+  if (isNaN(jours_irrigation.split(",").join(""))) {
+    create_and_throw_error("Les jours d'irrigation ne sont pas valide.");
+  }
+
+  if (isNaN(heures_irrigation.split(",").join(""))) {
+    create_and_throw_error("Les heures d'irrigation ne sont pas valide.");
+  }
+
+  TypeAgriculture.findOne({ where: { type: type_agriculture } })
+    .then((type) => {
+      if (!type) {
+        create_and_throw_error("Le type d'agriculture n'existe pas.", 404);
+      }
+      id_agri = type.dataValues.id_type;
+      return TypeTerre.findOne({ where: { type: type_terre } });
+    })
+    .then((type) => {
+      if (!type) {
+        create_and_throw_error("Le type de terre n'existe pas.", 404);
+      }
+      id_terre = type.dataValues.id_type;
+      return CycleVegetal.findOne({
+        where: {
+          [Op.and]: [
+            { id_type_agriculture: id_agri },
+            { id_type_terre: id_terre },
+          ],
+        },
+      });
+    })
+    .then((cycle) => {
+      if (cycle) {
+        create_and_throw_error("Le cycle existe deja.", 402);
+      }
+      const new_cycle = new CycleVegetal({
+        date_debut: date_debut,
+        date_fin: date_fin,
+        jours_irrigation: jours_irrigation,
+        heures_irrigation: heures_irrigation,
+        id_type_agriculture: id_agri,
+        id_type_terre: id_terre,
+      });
+      return new_cycle.save();
+    })
+    .then((saved_cycle) => {
+      res.status(200).json({
+        cycle: saved_cycle,
       });
     })
     .catch((err) => error_handler(err, next));
@@ -373,6 +574,101 @@ exports.coupons = (req, res, next) => {
       );
       res.status(200).json({
         coupons: new_coupons,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.terres = (req, res, next) => {
+  const user_id = 1;
+  //afficher tous les terre
+  Terre.findAll({ where: { id_client: user_id } }).then(async (terres) => {
+    if (!terres) {
+      create_and_throw_error(
+        "une erreur s'est produite lors de la récupération des données.",
+        405
+      );
+    }
+    const new_terres = await Promise.all(
+      terres.map(async (terre) => {
+        try {
+          const type_terre = await TypeTerre.findByPk(
+            terre.dataValues.id_type_terre
+          );
+          if (!type_terre) {
+            create_and_throw_error("le type de la terre n'existe pas.", 404);
+          }
+          const offre = await Offre.findByPk(terre.dataValues.id_offre);
+          if (!offre) {
+            create_and_throw_error("l'offre de la terre n'existe pas.", 404);
+          }
+          const client = await Client.findByPk(terre.dataValues.id_client);
+          const new_terre = {
+            ...terre.dataValues,
+            client: {
+              nom: client.dataValues.nom,
+              prenom: client.dataValues.prenom,
+            },
+            offre: {
+              nom: offre.dataValues.titre,
+            },
+            type_terre: {
+              nom: type_terre.dataValues.type,
+            },
+          };
+          return new_terre;
+        } catch (err) {
+          error_handler(err, next);
+        }
+      })
+    );
+    res.status(200).json({
+      terres: new_terres,
+    });
+  });
+};
+exports.capteur_sys = (req, res, next) => {
+  const user_id = 1;
+  CapteurSys.findAll({ where: { id_admin: user_id } })
+    .then(async (capteurs) => {
+      const new_capteurs = await Promise.all(
+        capteurs.map(async (capteur) => {
+          try {
+            const type = await TypeCapteur.findByPk(capteur.dataValues.id_type);
+            if (!type) {
+              create_and_throw_error(
+                `Le type du capteur sous le code ${capteur.dataValues.code}`
+              );
+            }
+            const new_capteur = {
+              ...capteur.dataValues,
+              type: {
+                nom: type.dataValues.type,
+              },
+            };
+            return new_capteur;
+          } catch (err) {
+            error_handler(err, next);
+          }
+        })
+      );
+      res.status(200).json({
+        capteurs: new_capteurs,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.type_capteur = (req, res, next) => {
+  const user_id = 1;
+  TypeCapteur.findAll({ where: { id_admin: user_id } })
+    .then((types) => {
+      if (!types) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de le récupération des données.",
+          405
+        );
+      }
+      res.status(200).json({
+        types: types,
       });
     })
     .catch((err) => error_handler(err, next));

@@ -27,9 +27,10 @@ const CycleVegetal = require("./models/CycleVegetal");
 const Zone = require("./models/Zone");
 const Irrigation = require("./models/Irrigation");
 const Pompe = require("./models/Pompe");
-const Robinet = require("./models/Robinet");
-
-
+const Capteur = require("./models/Capteur");
+const Capteur_Sys = require("./models/CapteurSys");
+const TypeCapteur = require("./models/TypeCapteur");
+// const Robinet = require("./models/Robinet");
 
 // importing routes
 const adminRoutes = require("./routes/admin");
@@ -162,12 +163,12 @@ Terre.belongsTo(TypeTerre, {
   constraints: true,
   onDelete: "CASCADE",
   foreignKey: "id_type_terre",
-}),
-  CycleVegetal.belongsTo(TypeTerre, {
-    constraints: true,
-    onDelete: "CASCADE",
-    foreignKey: "id_type_terre",
-  });
+});
+CycleVegetal.belongsTo(TypeTerre, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_type_terre",
+});
 CycleVegetal.belongsTo(TypeAgriculture, {
   constraints: true,
   onDelete: "CASCADE",
@@ -194,24 +195,51 @@ Irrigation.belongsTo(Zone, {
   foreignKey: "id_zone",
 });
 
-Pompe.belongsTo(Terre, {
-  constraints: true,
-  onDelete: "CASCADE",
-  foreignKey: "id_terre",
-});
-
-Robinet.belongsTo(Pompe, {
-  constraints: true,
-  onDelete: "CASCADE",
-  foreignKey: "id_pompe",
-});
-Robinet.belongsTo(Zone, {
+Pompe.belongsTo(Zone, {
   constraints: true,
   onDelete: "CASCADE",
   foreignKey: "id_zone",
 });
+
+Capteur.belongsTo(Zone, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_zone",
+});
+Capteur.belongsTo(Capteur_Sys, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_type",
+});
+
+Capteur_Sys.belongsTo(TypeCapteur, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_type",
+});
+Capteur_Sys.belongsTo(Admin, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_admin",
+});
+TypeCapteur.belongsTo(Admin, {
+  constraints: true,
+  onDelete: "CASCADE",
+  foreignKey: "id_admin",
+});
+
+// Robinet.belongsTo(Pompe, {
+//   constraints: true,
+//   onDelete: "CASCADE",
+//   foreignKey: "id_pompe",
+// });
+// Robinet.belongsTo(Zone, {
+//   constraints: true,
+//   onDelete: "CASCADE",
+//   foreignKey: "id_zone",
+// });
 sequelize
-  //   .sync({ force: true })
+  // .sync({ force: true })
   .sync()
   .then((result) => {
     console.log("Database connected");

@@ -110,6 +110,131 @@ router.post(
   admin_controllers.create_coupon
 );
 
+router.post(
+  "/terre",
+  [
+    body("offre")
+      .notEmpty()
+      .withMessage("L'offre est manquante est manquante.")
+      .trim(),
+    body("type_agriculture")
+      .notEmpty()
+      .withMessage(
+        "Vous devez indiquez le type d'agriculture que vous allez utiliser dans la terre."
+      )
+      .trim(),
+    body("localisation")
+      .notEmpty()
+      .withMessage("Vous devez indiquer la localisation de votre terre.")
+      .trim(),
+    body("superficie")
+      .notEmpty()
+      .withMessage("La superficie est manquante.")
+      .isNumeric()
+      .withMessage("La superficie n'est pas valide.")
+      .trim(),
+    body("type_terre")
+      .notEmpty()
+      .withMessage("Le type de la terre est manquant.")
+      .trim(),
+  ],
+  admin_controllers.create_terre
+);
+router.post(
+  "/type_capteur",
+  [body("type").notEmpty().withMessage("Entrer le type.").trim()],
+  admin_controllers.create_type_capteur
+);
+
+router.post(
+  "/capteur_sys",
+  [
+    body("code")
+      .notEmpty()
+      .withMessage("Le code du capteur est manquant.")
+      .isAlphanumeric()
+      .withMessage("Le code du capteur ne contient pas de caractères speciaux.")
+      .trim()
+      .isLength({ min: 2, max: 10 })
+      .withMessage("Le code doit contenir au moin 2 caractère et 10 au max."),
+    body("nom").notEmpty().withMessage("donner un nom au capteur.").trim(),
+    body("type")
+      .notEmpty()
+      .withMessage("Le type du capteur est manquant.")
+      .trim(),
+  ],
+  admin_controllers.create_capteur_sys
+);
+
+router.post(
+  "/cycle",
+  [
+    body("jours_irrigation")
+      .notEmpty()
+      .withMessage("Vous devez introduire des jours pour faire l'irrigation.")
+      .trim(),
+    body("heures_irrigation")
+      .notEmpty()
+      .withMessage(
+        "Vous devez introduire des heures spécifique pour faire l'irrigation."
+      )
+      .trim(),
+    body("date_debut")
+      .notEmpty()
+      .withMessage("Date debut du cycle est obligatoire.")
+      .custom((value, { req }) => {
+        const date = value.split("-");
+        if (date.length !== 2) {
+          throw new Error(
+            "La date debut n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
+          );
+        }
+        const correct_mount = parseInt(date[0]) <= 12 && parseInt(date[0]) > 0;
+        const correct_day = parseInt(date[1]) <= 31 && parseInt(date[1]) > 0;
+        console.log(correct_mount);
+        console.log(correct_day);
+        if (!(correct_day && correct_mount)) {
+          throw new Error(
+            "La date debut n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
+          );
+        }
+        return true;
+      })
+      .trim(),
+    body("date_fin")
+      .notEmpty()
+      .withMessage("Date fin du cycle est obligatoire.")
+      .custom((value, { req }) => {
+        const date = value.split("-");
+        if (date.length !== 2) {
+          throw new Error(
+            "La date fin n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
+          );
+        }
+        const correct_mount = parseInt(date[0]) <= 12 && parseInt(date[0]) > 0;
+        const correct_day = parseInt(date[1]) <= 31 && parseInt(date[1]) > 0;
+        console.log(correct_mount);
+        console.log(correct_day);
+        if (!(correct_day && correct_mount)) {
+          throw new Error(
+            "La date fin n'est pas valide, veillez introduire une date sous le format 'MM-JJ'."
+          );
+        }
+        return true;
+      })
+      .trim(),
+    body("type_agriculture")
+      .notEmpty()
+      .withMessage("Le type d'irrigation du cycle est obligatoire.")
+      .trim(),
+    body("type_terre")
+      .notEmpty()
+      .withMessage("Le type de terre est obligatoire.")
+      .trim(),
+  ],
+  admin_controllers.create_cycle_vegetal
+);
+
 // GET Routes
 
 router.get("/type-agriculture", admin_controllers.types_agriculture);
@@ -117,6 +242,9 @@ router.get("/type-paiment", admin_controllers.types_paiment);
 router.get("/type-terre", admin_controllers.types_terre);
 router.get("/offre", admin_controllers.offres);
 router.get("/coupon", admin_controllers.coupons);
+router.get("/terre", admin_controllers.terres);
+router.get("/types_capteur", admin_controllers.type_capteur);
+router.get("/capteur_sys", admin_controllers.capteur_sys);
 
 // PUT Routes
 router.put(

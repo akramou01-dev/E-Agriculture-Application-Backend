@@ -1,32 +1,32 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../config/Database");
-
-const Pompe = sequelize.define(
-  "pompe",
+const Capteur = sequelize.define(
+  "type_capteur",
   {
-    id_pompe: {
+    id_type: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
-    etat: {
-      type: Sequelize.ENUM("marche", "arret"),
+    type: {
+      type: Sequelize.STRING,
       allowNull: false,
     },
-    id_zone: {
+    id_admin: {
       type: Sequelize.INTEGER.UNSIGNED,
       allowNull: false,
       reference: {
-        model: "zone",
-        key: "id_zone",
+        model: "admin",
+        key: "id_admin",
       },
     },
   },
   {
     timestamps: false,
     freezeTableName: true,
-    tableName: "pompe",
+    tableName: "type_capteur",
   }
 );
-module.exports = Pompe;
+
+module.exports = Capteur;

@@ -36,7 +36,19 @@ const Terre = sequelize.define(
     },
     date_expriration_offre: {
       type: Sequelize.DATE,
+      allowNull: true,
+    },
+    offre_payé: {
+      type: Sequelize.BOOLEAN,
       allowNull: false,
+    },
+    longitude: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    lattitude: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
     },
     id_client: {
       type: Sequelize.INTEGER.UNSIGNED,

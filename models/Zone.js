@@ -12,7 +12,19 @@ const Zone = sequelize.define(
     },
     nbr_irrigation_rester: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
+    },
+    irrigation_auto : {
+      type : Sequelize.BOOLEAN, 
+      allowNull : false,
+    },
+    joures_irrigation : {
+      type : Sequelize.STRING, 
+      allowNull : true, 
+    },
+    heures_irrigation : {
+      type : Sequelize.STRING, 
+      allowNull : true,
     },
     id_type_agriculture: {
       type: Sequelize.INTEGER.UNSIGNED,
@@ -32,8 +44,8 @@ const Zone = sequelize.define(
     },
     id_cycle: {
       type: Sequelize.INTEGER.UNSIGNED,
-      allowNull: false,
-      reference: {  
+      allowNull: true,
+      reference: {
         model: "cycle_vegetal",
         key: "id_cycle",
       },
