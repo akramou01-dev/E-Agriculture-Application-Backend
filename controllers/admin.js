@@ -10,6 +10,7 @@ const CycleVegetal = require("../models/CycleVegetal");
 const Zone = require("../models/Zone");
 const Coupon = require("../models/Coupon");
 const Terre = require("../models/Terre");
+const Capteur = require("../models/Capteur");
 
 const {
   error_handler,
@@ -485,6 +486,17 @@ exports.create_zone = (req, res, next) => {
       return new_zone.save();
     })
     .then((new_zone) => {
+      // creation des capteurs
+      req.ids_type.forEach(async (id_type) => {
+        const capteur_sys = await CapteurSys.findOne({
+          where: { id_type: id_type },
+        });
+        const new_capteur = new Capteur({
+          id_type: capteur_sys.dataValues.id_capteur,
+          id_zone: new_zone.id_zone,
+        });
+        const saved_capteur = await new_capteur.save();
+      });
       res.status(200).json({
         zone: new_zone,
         message: "zone crée avec succée.",
@@ -807,11 +819,26 @@ exports.cycles_vegetal = (req, res, next) => {
     .catch((err) => error_handler(err, next));
 };
 exports.zones = (req, res, next) => {
-  /**on va récupérer les zones d'une terre donnée pour un client donnée 
+  /**on va récupérer les zones d'une terre donnée pour un client donnée
    * les donnée de la terre et du client sont envoyer en query parameters
    */
-  const nom_terre = req.query.nom_terre;
-  const client = req.query.client;
+  /**format du query
+   * /zone?nom_terre=valeur&client=prenom nom
+   */
+  const nom_terre = req.query.nom_terre ? req.query.nom_terre : null;
+  if (nom_terre === null) {
+    create_and_throw_error(
+      "Vous devez envoyer le nom de la terre en query parameters.",
+      402
+    );
+  }
+  const client = req.query.client ? req.query.client : null;
+  if (client === null) {
+    create_and_throw_error(
+      "Vous devez envoyer les infos du client en query parameters.",
+      402
+    );
+  }
   const nom_client = client.split(" ")[0];
   const prenom_client = client.split(" ")[1];
   validation_errors_handler(req);
@@ -850,7 +877,7 @@ exports.zones = (req, res, next) => {
           const type_agriculture = await TypeAgriculture.findByPk(
             zone.dataValues.id_type_agriculture
           );
-          const terre = await Terre
+          const terre = await Terre;
           return {
             ...zone.dataValues,
             type_agriculture: {
@@ -861,6 +888,46 @@ exports.zones = (req, res, next) => {
       );
       res.status(200).json({
         zones: new_zones,
+      });
+    })
+    .catch((err) => error_handler(err, next));
+};
+exports.capteurs = (req, res, next) => {
+  const id_zone = req.params.id_zone;
+  // pour ajouter plus de sécurité on on peut ajouter la vérificatin des terres du clients
+  const client = req.query.client;
+  Zone.findByPk(id_zone)
+    .then((zone) => {
+      if (!zone) {
+        create_and_throw_error("La zone n'existe pas.", 404);
+      }
+      return Capteur.findAll({ where: { id_zone: id_zone } });
+    })
+    .then(async (capteurs) => {
+      if (!capteurs) {
+        create_and_throw_error(
+          "Une erreur s'est produite lors de la récupération des données.",
+          405
+        );
+      }
+      const new_capteurs = await Promise.all(
+        capteurs.map(async (capteur) => {
+          const capteur_sys = await CapteurSys.findByPk(
+            capteur.dataValues.id_type
+          );
+          const type_capteur = await TypeCapteur.findByPk(
+            capteur_sys.dataValues.id_type
+          );
+          return {
+            ...capteur.dataValues,
+            nom: capteur_sys.dataValues.nom,
+            code: capteur_sys.dataValues.code,
+            type_capteur: type_capteur.dataValues.type,
+          };
+        })
+      );
+      res.status(200).json({
+        capteurs: new_capteurs,
       });
     })
     .catch((err) => error_handler(err, next));

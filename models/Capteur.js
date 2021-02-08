@@ -12,6 +12,7 @@ const Capteur = sequelize.define(
     etat: {
       type: Sequelize.ENUM("activé", "désactivé"),
       allowNull: false,
+      defaultValue : "désactivé"
     },
     id_zone: {
       type: Sequelize.INTEGER.UNSIGNED,

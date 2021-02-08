@@ -4,8 +4,7 @@ const router = express.Router();
 const { body } = require("express-validator");
 // importing admin controllers
 const admin_controllers = require("../controllers/admin");
-const { create_and_throw_error } = require("../utils/error_handlers");
-
+const TypeCapteur = require("../models/TypeCapteur");
 /**Routes Naming
  * POST for creating
  * PUT for update
@@ -253,7 +252,29 @@ router.post(
         return true;
       })
       .trim(),
+    body("capteurs")
+      .notEmpty()
+      .withMessage("Veillez spécifier des capteurs pour la zone.")
+      .isArray()
+      .withMessage("Les capteurs doivent étre dans un tableau.")
+      .custom(async (value, { req }) => {
+        const types = await TypeCapteur.findAll();
+        const ids_type = types.map((type) => {
+          if (value.includes(type.dataValues.type)) {
+            return type.dataValues.id_type;
+          }
+        });
+        req.ids_type = ids_type;
+        if (ids_type.length < value.length) {
+          throw new Error(
+            "Nombre de types de capteur depasse le nombre de types dans la base de donnée."
+          );
+        }
+        return true;
+      })
+      .trim(),
   ],
+
   admin_controllers.create_zone
 );
 
@@ -269,6 +290,7 @@ router.get("/types_capteur", admin_controllers.type_capteur);
 router.get("/capteur_sys", admin_controllers.capteur_sys);
 router.get("/cycle", admin_controllers.cycles_vegetal);
 router.get("/zone", admin_controllers.zones);
+router.get("/capteur/:id_zone", admin_controllers.capteurs);
 
 // PUT Routes
 router.put(
