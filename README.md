@@ -1,2 +1,2 @@
-# irrigation-Backend
-irrigation backend
+#E-Agriculture Application Backend
+A NodeJs api for a E-Agriculture application that do smart irrigation.
